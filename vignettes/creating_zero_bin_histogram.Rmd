@@ -26,7 +26,7 @@ library(stringr)
 Reading in the data:
 ``` {r}
 
-raw_stock_price_data <- read.csv("~/zeroBinHist/vignettes/HistoricalData_1746910817326.csv")
+raw_stock_price_data <- read.csv("vignettes/HistoricalData_1746910817326.csv")
 
 daily_change <- raw_stock_price_data %>% 
   janitor::clean_names() %>% 
