@@ -1,5 +1,5 @@
 ---
-title: "creating_zero_bin_histogram"
+title: "Creating a Zero Bin Histogram"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{creating_zero_bin_histogram}
@@ -26,9 +26,9 @@ library(stringr)
 Reading in the data:
 ``` {r}
 
-raw_stock_price_data <- read.csv("vignettes/HistoricalData_1746910817326.csv")
+raw_stock_price_data <- read.csv("~/zeroBinHist/vignettes/HistoricalData_1746910817326.csv")
 
-daily_change <- raw_data %>% 
+daily_change <- raw_stock_price_data %>% 
   janitor::clean_names() %>% 
   mutate(date = mdy(date)
          , close = close_last %>% str_remove_all(fixed("$")) %>% as.numeric()) %>% 
@@ -37,21 +37,27 @@ daily_change <- raw_data %>%
 
 ```
 
-Creating zero binned data two ways, one partitioned by year and the other without a grouping column.
+Use `bin_data_with_zero` to create zero binned data. This is done two ways, one partitioned by year and the other without a grouping column. This example uses the daily percent change in the closing price for COF from 2015-2023.
+
 ``` {r}
 
-binned_data <- zeroBinHist::bin_data_with_zero(daily_change, value_col = "daily_percent_change")
-yearly_binned_data <- zeroBinHist::bin_data_with_zero(daily_change, value_col = "daily_percent_change", group_col = "year")
+binned_data <- bin_data_with_zero(daily_change, value_col = "daily_percent_change")
+yearly_binned_data <- bin_data_with_zero(daily_change, value_col = "daily_percent_change", group_col = "year")
+
+head(yearly_binned_data)
 
 ```
 
-Plotting binned data into histogram
+Use `plot_zero_bin_histogram` and the output from `bin_data_with_zero` to create a baic histogram with a zero bin.
+
 ``` {r}
-plot <- plot_zero_bin_histogram_2(binned_data, counter = 0.005, x_format = percent_format(0.01))+
+plot <- plot_zero_bin_histogram(binned_data, counter = 0.005, x_format = percent_format(0.01))+
   theme(axis.title.x = element_blank())
 
+print(plot)
+
 ```
-Adding a legend and color coding
+When overlaying multiple distributions, use `yearly_binned_data_to_plot` to add color and a legend.
 
 ``` {r}
 
@@ -59,13 +65,16 @@ yearly_binned_data_to_plot <- yearly_binned_data %>%
   filter(year %in% c(2015, 2023)) %>% 
   mutate(year = year %>% as.character())
 
-plot_yearly <- plot_zero_bin_histogram(yearly_binned_data_to_plot, group_col = "year", counter = 0.005, x_format = percent_format(0.01))
+plot_yearly <- plot_zero_bin_histogram(yearly_binned_data_to_plot, group_col = "year"
+                                       , counter = 0.005, x_format = percent_format(0.01), drop_line = T)
 
-plot_yearly_with_legend <- zeroBinHist::customize_zero_bin_legend(plot_yearly, yearly_binned_data_to_plot, group_col = "year"
+plot_yearly_with_legend <- customize_zero_bin_legend(plot_yearly, yearly_binned_data_to_plot, group_col = "year"
                                                                   , fill_colors = c("2015" = "darkred", "2023" = "navy")) + 
   theme(legend.position="bottom") +
   theme(legend.title=element_blank(),
         axis.title.x = element_blank())+
   theme_bw()
+
+print(plot_yearly_with_legend)
 
 ```
