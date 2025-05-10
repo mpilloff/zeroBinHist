@@ -24,22 +24,21 @@ bin_data_with_zero <- function(
     bins = 50,
     cutoff_low = NULL,
     cutoff_high = NULL) {
-  
+
   library(dplyr)
-  library(rlang)
 
   value_sym <- sym(value_col)
-  
+
   df_filtered <- df %>%
     filter(!is.na(!!value_sym))
-  
+
   # Calculate cutoffs
   cutoff_low_val <- coalesce(cutoff_low, quantile(df_filtered[[value_col]], 0.05, na.rm = TRUE))
   cutoff_high_val <- coalesce(cutoff_high, quantile(df_filtered[[value_col]], 0.95, na.rm = TRUE))
-  
+
   # Find bin width
   bin_width <- (cutoff_high_val - cutoff_low_val) / (bins - 1)
-  
+
   # Create bin assignment
   # 0 bin is is value is rounded to 0 at the 6th decimal due to float precision
   df_binned <- df_filtered %>%
@@ -50,7 +49,7 @@ bin_data_with_zero <- function(
         TRUE ~ bin_width * ceiling(!!value_sym / bin_width)
       )
     )
-  
+
   # Count values in each bin per group
   df_summary <- df_binned %>%
     group_by(across(all_of(group_col)), bin) %>%
@@ -68,9 +67,9 @@ bin_data_with_zero <- function(
       cutoff_high = cutoff_high_val,
       length = total
     ) %>%
-    ungroup() %>% 
+    ungroup() %>%
     select(all_of(group_col), bin, length, bin_width, cutoff_high, cutoff_low, obs_num, prop)
-  
+
   return(df_summary)
-  
+
 }

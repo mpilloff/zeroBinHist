@@ -20,13 +20,12 @@ customize_zero_bin_legend <- function(
     group_col = "name",
     legend_labels = NULL,
     fill_colors = NULL) {
-  
+
   library(ggplot2)
   library(dplyr)
-  library(rlang)
-  
+
   group_sym <- sym(group_col)
-  
+
   # Re-map group labels in the data if legend_labels provided
   if (!is.null(legend_labels)) {
     binned_data <- binned_data %>%
@@ -35,17 +34,17 @@ customize_zero_bin_legend <- function(
     binned_data <- binned_data %>%
       mutate(legend_label = !!group_sym)
   }
-  
+
   # Rebuild the plot with new legend labels
   bin_width <- unique(binned_data$bin_width)
-  
-  p <- p %+% binned_data + 
+
+  p <- p %+% binned_data +
     aes(fill = legend_label, group = legend_label)
-  
+
   # Apply color scheme if provided
   if (!is.null(fill_colors)) {
     p <- p + scale_fill_manual(values = fill_colors)
   }
-  
+
   return(p)
 }

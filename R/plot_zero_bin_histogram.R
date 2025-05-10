@@ -25,26 +25,25 @@ plot_zero_bin_histogram <- function(
     y_format = percent_format(),
     x_format = number_format(),
     drop_line = F) {
-  
+
   library(ggplot2)
-  library(rlang)
   library(dplyr)
   library(scales)
-  
+
   group_sym <- sym(group_col)
   bin_width <- unique(binned_data$bin_width)
-  
+
   # Get axis range from cutoff values
   # Add/subtract half a bin to include the cutoff bins
   cutoff_low <- unique(binned_data$cutoff_low) - .5*bin_width
   cutoff_high <- unique(binned_data$cutoff_high) + .5*bin_width
-  
+
   # Compute label positions and text
   x_min <- floor(cutoff_low/counter)*counter
   x_max <- ceiling(cutoff_high/counter)*counter
-  
+
   .labels <- seq(x_min, x_max, by = counter)
-  
+
   ## Manually change x-axis to move all ticks by 1/2 bin width
   .breaks <- sapply(.labels, function(x) {
     if (x > 0) {
@@ -55,7 +54,7 @@ plot_zero_bin_histogram <- function(
       x - 0.5 * bin_width
     }
   })
-  
+
   # Build plot
   p <- ggplot(binned_data, aes(x = bin, y = !!sym(y_var), fill = !!group_sym, group = !!group_sym)) +
     geom_col(position = "identity", alpha = 0.5, width = bin_width) +
@@ -69,16 +68,16 @@ plot_zero_bin_histogram <- function(
       labels = y_format
       , expand = c(0, 0)
     )
-  
+
   if (drop_line) {
     max_y <- binned_data %>% summarise(max_val = max(!!sym(y_var))) %>% pull(max_val)
-    
+
     p <- p +
       annotate("text", x = 0, y = max_y, label = "No Change", vjust = 3, hjust = -0.08,
                size = 10 / ggplot2::.pt, color = "black", fontface = "plain") +
       geom_vline(xintercept = 0, linetype = "dashed", size = 0.5, color = "black")
   }
-  
+
   return(p)
 }
 
