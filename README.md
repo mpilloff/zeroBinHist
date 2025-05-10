@@ -10,5 +10,7 @@ price changes) need special attention.
 
 To install the development version from GitHub:
 
-\`\`\`r \# install.packages(“devtools”)
-devtools::install_github(“your_github_username/zeroBinHist”)
+``` r
+# install.packages("devtools")
+devtools::install_github("your_github_username/zeroBinHist")
+```
