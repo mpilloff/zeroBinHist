@@ -14,3 +14,7 @@ Imports:
     ggplot2,
     scales
 Config/testthat/edition: 3
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

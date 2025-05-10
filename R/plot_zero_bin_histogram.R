@@ -19,7 +19,7 @@
 
 plot_zero_bin_histogram <- function(
     binned_data,
-    group_col = "name",
+    group_col = NULL,
     counter = 0.5,
     y_var = "prop",
     y_format = percent_format(),
@@ -30,7 +30,6 @@ plot_zero_bin_histogram <- function(
   library(dplyr)
   library(scales)
 
-  group_sym <- sym(group_col)
   bin_width <- unique(binned_data$bin_width)
 
   # Get axis range from cutoff values
@@ -55,8 +54,15 @@ plot_zero_bin_histogram <- function(
     }
   })
 
-  # Build plot
-  p <- ggplot(binned_data, aes(x = bin, y = !!sym(y_var), fill = !!group_sym, group = !!group_sym)) +
+  # Build plot but add in redundancy if grouping column does not exist
+  if (!is.null(group_col)) {
+    group_sym <- sym(group_col)
+    p <- ggplot(binned_data, aes(x = bin, y = !!sym(y_var), fill = !!group_sym, group = !!group_sym))
+  } else {
+    p <- ggplot(binned_data, aes(x = bin, y = !!sym(y_var)))
+  }
+
+  p <- p +
     geom_col(position = "identity", alpha = 0.5, width = bin_width) +
     scale_x_continuous(
       expand = c(0, 0),

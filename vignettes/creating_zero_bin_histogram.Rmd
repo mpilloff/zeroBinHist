@@ -1,0 +1,71 @@
+---
+title: "creating_zero_bin_histogram"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{creating_zero_bin_histogram}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(zeroBinHist)
+library(dplyr)
+library(lubridate)
+library(janitor)
+library(stringr)
+
+```
+
+Reading in the data:
+``` {r}
+
+raw_stock_price_data <- read.csv("vignettes/HistoricalData_1746910817326.csv")
+
+daily_change <- raw_data %>% 
+  janitor::clean_names() %>% 
+  mutate(date = mdy(date)
+         , close = close_last %>% str_remove_all(fixed("$")) %>% as.numeric()) %>% 
+  arrange(date) %>% 
+  transmute(date, close, daily_percent_change = close/lag(close) - 1, year = year(date))
+
+```
+
+Creating zero binned data two ways, one partitioned by year and the other without a grouping column.
+``` {r}
+
+binned_data <- zeroBinHist::bin_data_with_zero(daily_change, value_col = "daily_percent_change")
+yearly_binned_data <- zeroBinHist::bin_data_with_zero(daily_change, value_col = "daily_percent_change", group_col = "year")
+
+```
+
+Plotting binned data into histogram
+``` {r}
+plot <- plot_zero_bin_histogram_2(binned_data, counter = 0.005, x_format = percent_format(0.01))+
+  theme(axis.title.x = element_blank())
+
+```
+Adding a legend and color coding
+
+``` {r}
+
+yearly_binned_data_to_plot <- yearly_binned_data %>% 
+  filter(year %in% c(2015, 2023)) %>% 
+  mutate(year = year %>% as.character())
+
+plot_yearly <- plot_zero_bin_histogram(yearly_binned_data_to_plot, group_col = "year", counter = 0.005, x_format = percent_format(0.01))
+
+plot_yearly_with_legend <- zeroBinHist::customize_zero_bin_legend(plot_yearly, yearly_binned_data_to_plot, group_col = "year"
+                                                                  , fill_colors = c("2015" = "darkred", "2023" = "navy")) + 
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank(),
+        axis.title.x = element_blank())+
+  theme_bw()
+
+```
